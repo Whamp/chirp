@@ -70,7 +70,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 
 class ConfigManager:
     def __init__(self, *, app_name: str = "Chirp", legacy_app_author: Optional[str] = "Will") -> None:
-        dirs = PlatformDirs(app_name=app_name, appauthor=False, roaming=True)
+        dirs = PlatformDirs(appname=app_name, appauthor=False, roaming=True)
         self._base_dir = Path(dirs.user_config_dir)
         self._config_path = self._base_dir / "config.json"
         self._models_root = self._base_dir / "models"
@@ -109,7 +109,7 @@ class ConfigManager:
             return
         if self._base_dir.exists():
             return
-        legacy_dirs = PlatformDirs(app_name=app_name, appauthor=legacy_app_author, roaming=True)
+        legacy_dirs = PlatformDirs(appname=app_name, appauthor=legacy_app_author, roaming=True)
         legacy_dir = Path(legacy_dirs.user_config_dir)
         if not legacy_dir.exists():
             return
