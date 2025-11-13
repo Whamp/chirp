@@ -9,6 +9,7 @@ description = "parakeetV3 powered cpu only Speech-To-Text Local Inference on Win
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "huggingface_hub>=0.24",
     "keyboard>=0.13.5",
     "numpy>=2.3.4",
     "onnx-asr[cpu,hub]>=0.7.0",
@@ -20,6 +21,7 @@ dependencies = [
 
 [project.scripts]
 chirp = "chirp.main:main"
+chirp-setup = "chirp.setup:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/chirp"]

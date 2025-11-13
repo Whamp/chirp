@@ -7,7 +7,7 @@ from .audio_feedback import AudioFeedback
 from .config_manager import ConfigManager
 from .keyboard_shortcuts import KeyboardShortcutManager
 from .logger import get_logger
-from .parakeet_manager import ParakeetManager
+from .parakeet_manager import ModelNotPreparedError, ParakeetManager
 from .text_injector import TextInjector
 
 
@@ -16,17 +16,23 @@ class ChirpApp:
         self.logger = get_logger()
         self.config_manager = ConfigManager()
         self.config = self.config_manager.load()
+        model_dir = self.config_manager.model_dir(self.config.parakeet_model, self.config.parakeet_quantization)
 
         self.keyboard = KeyboardShortcutManager(logger=self.logger)
         self.audio_capture = AudioCapture(status_callback=self._log_capture_status)
         self.audio_feedback = AudioFeedback(logger=self.logger, enabled=self.config.audio_feedback)
-        self.parakeet = ParakeetManager(
-            model_name=self.config.parakeet_model,
-            quantization=self.config.parakeet_quantization,
-            provider_key=self.config.onnx_providers,
-            threads=self.config.threads,
-            logger=self.logger,
-        )
+        try:
+            self.parakeet = ParakeetManager(
+                model_name=self.config.parakeet_model,
+                quantization=self.config.parakeet_quantization,
+                provider_key=self.config.onnx_providers,
+                threads=self.config.threads,
+                logger=self.logger,
+                model_dir=model_dir,
+            )
+        except ModelNotPreparedError as exc:
+            self.logger.error(str(exc))
+            raise SystemExit(1) from exc
         self.text_injector = TextInjector(
             keyboard_manager=self.keyboard,
             logger=self.logger,

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional, Sequence
+from pathlib import Path
+from typing import Optional, Sequence
 
 import numpy as np
 import onnx_asr
+from onnx_asr.loader import ModelFileNotFoundError, ModelPathNotFoundError
 
 try:
     import onnxruntime as ort
@@ -19,6 +21,10 @@ PROVIDER_MAP = {
 }
 
 
+class ModelNotPreparedError(RuntimeError):
+    pass
+
+
 class ParakeetManager:
     def __init__(
         self,
@@ -28,12 +34,14 @@ class ParakeetManager:
         provider_key: str,
         threads: Optional[int],
         logger: logging.Logger,
+        model_dir: Path,
     ) -> None:
         self._logger = logger
         self._model_name = model_name
         self._quantization = quantization
         self._providers = self._resolve_providers(provider_key)
         self._session_options = self._build_session_options(threads)
+        self._model_dir = model_dir
         self._model = self._load_model()
 
     def _resolve_providers(self, key: str) -> Sequence[str]:
@@ -62,12 +70,19 @@ class ParakeetManager:
             self._quantization or "none",
             ",".join(self._providers),
         )
-        return onnx_asr.load_model(
-            self._model_name,
-            quantization=self._quantization,
-            providers=self._providers,
-            sess_options=self._session_options,
-        )
+        self._model_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            return onnx_asr.load_model(
+                self._model_name,
+                path=str(self._model_dir),
+                quantization=self._quantization,
+                providers=self._providers,
+                sess_options=self._session_options,
+            )
+        except (ModelPathNotFoundError, ModelFileNotFoundError) as exc:
+            raise ModelNotPreparedError(
+                f"Model not found at {self._model_dir} — run: uv run chirp-setup"
+            ) from exc
 
     def transcribe(self, audio: np.ndarray, *, sample_rate: int = 16_000, language: Optional[str] = None) -> str:
         if audio.ndim > 1:

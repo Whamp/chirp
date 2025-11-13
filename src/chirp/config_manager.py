@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import re
+import shutil
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -67,19 +69,25 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 
 
 class ConfigManager:
-    def __init__(self, *, app_name: str = "Chirp", app_author: str = "Will") -> None:
-        dirs = PlatformDirs(app_name=app_name, appauthor=app_author, roaming=True)
-        self._config_dir = Path(dirs.user_config_dir)
-        self._config_path = self._config_dir / "config.json"
+    def __init__(self, *, app_name: str = "Chirp", legacy_app_author: Optional[str] = "Will") -> None:
+        dirs = PlatformDirs(app_name=app_name, appauthor=False, roaming=True)
+        self._base_dir = Path(dirs.user_config_dir)
+        self._config_path = self._base_dir / "config.json"
+        self._models_root = self._base_dir / "models"
+        self._migrate_legacy_path(app_name=app_name, legacy_app_author=legacy_app_author)
 
     @property
     def config_path(self) -> Path:
         return self._config_path
 
+    @property
+    def models_root(self) -> Path:
+        return self._models_root
+
     def ensure_exists(self) -> None:
         if self._config_path.exists():
             return
-        self._config_dir.mkdir(parents=True, exist_ok=True)
+        self._base_dir.mkdir(parents=True, exist_ok=True)
         self._config_path.write_text(json.dumps(DEFAULT_CONFIG, indent=2), encoding="utf-8")
 
     def load(self) -> ChirpConfig:
@@ -88,5 +96,34 @@ class ConfigManager:
         return ChirpConfig.from_dict(data)
 
     def save(self, config: ChirpConfig) -> None:
-        self._config_dir.mkdir(parents=True, exist_ok=True)
+        self._base_dir.mkdir(parents=True, exist_ok=True)
         self._config_path.write_text(json.dumps(config.to_dict(), indent=2), encoding="utf-8")
+
+    def model_dir(self, model_name: str, quantization: Optional[str]) -> Path:
+        suffix = "-int8" if (quantization or "").lower() == "int8" else ""
+        safe = re.sub(r"[^A-Za-z0-9._-]+", "-", model_name.lower()).strip("-") or "model"
+        return self._models_root / f"{safe}{suffix}"
+
+    def _migrate_legacy_path(self, *, app_name: str, legacy_app_author: Optional[str]) -> None:
+        if not legacy_app_author:
+            return
+        if self._base_dir.exists():
+            return
+        legacy_dirs = PlatformDirs(app_name=app_name, appauthor=legacy_app_author, roaming=True)
+        legacy_dir = Path(legacy_dirs.user_config_dir)
+        if not legacy_dir.exists():
+            return
+        try:
+            legacy_dir.rename(self._base_dir)
+            return
+        except OSError:
+            pass
+        self._base_dir.mkdir(parents=True, exist_ok=True)
+        for item in legacy_dir.iterdir():
+            target = self._base_dir / item.name
+            if target.exists():
+                continue
+            if item.is_dir():
+                shutil.copytree(item, target)
+            else:
+                shutil.copy2(item, target)
