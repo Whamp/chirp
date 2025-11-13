@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import argparse
 import threading
+from typing import Optional, Sequence
 
 from .audio_capture import AudioCapture
 from .audio_feedback import AudioFeedback
@@ -104,7 +106,23 @@ class ChirpApp:
         self.logger.debug("Audio status: %s", message)
 
 
-def main() -> None:
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="chirp",
+        description="Chirp – Windows dictation app using local Parakeet STT (CPU-only).",
+        epilog=(
+            "Usage:\n"
+            "  uv run chirp-setup   # one-time: download the Parakeet model files\n"
+            "  uv run chirp         # daily: start Chirp and use the configured hotkey\n\n"
+            "While Chirp is running, press your primary shortcut (default: win+alt+d)\n"
+            "to toggle recording on and off."
+        ),
+    )
+    return parser
+
+
+def main(argv: Optional[Sequence[str]] = None) -> None:
+    _build_parser().parse_args(argv)
     app = ChirpApp()
     app.run()
 

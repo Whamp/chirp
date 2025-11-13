@@ -87,6 +87,7 @@ name = "chirp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "huggingface-hub" },
     { name = "keyboard" },
     { name = "numpy" },
     { name = "onnx-asr", extra = ["cpu", "hub"] },
@@ -98,6 +99,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "huggingface-hub", specifier = ">=0.24" },
     { name = "keyboard", specifier = ">=0.13.5" },
     { name = "numpy", specifier = ">=2.3.4" },
     { name = "onnx-asr", extras = ["cpu", "hub"], specifier = ">=0.7.0" },

@@ -14,11 +14,7 @@ except ImportError:  # pragma: no cover - optional dependency
     ort = None  # type: ignore[assignment]
 
 
-PROVIDER_MAP = {
-    "cpu": ["CPUExecutionProvider"],
-    "cuda": ["CUDAExecutionProvider", "CPUExecutionProvider"],
-    "directml": ["DmlExecutionProvider", "CPUExecutionProvider"],
-}
+CPU_PROVIDERS: Sequence[str] = ("CPUExecutionProvider",)
 
 
 class ModelNotPreparedError(RuntimeError):
@@ -46,11 +42,12 @@ class ParakeetManager:
 
     def _resolve_providers(self, key: str) -> Sequence[str]:
         normalized = key.lower()
-        providers = PROVIDER_MAP.get(normalized)
-        if not providers:
-            self._logger.warning("Unknown provider '%s', falling back to CPU", key)
-            providers = PROVIDER_MAP["cpu"]
-        return providers
+        if normalized != "cpu":
+            self._logger.warning(
+                "GPU providers are not supported; forcing CPU provider (received: %s)",
+                key,
+            )
+        return CPU_PROVIDERS
 
     def _build_session_options(self, threads: Optional[int]):
         if not threads or threads < 1:
