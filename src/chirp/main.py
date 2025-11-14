@@ -59,7 +59,7 @@ class ChirpApp:
             logger=self.logger,
             paste_mode=self.config.paste_mode,
             word_overrides=self.config.word_overrides,
-            whisper_prompt=self.config.whisper_prompt,
+            post_processing=self.config.post_processing,
             clipboard_behavior=self.config.clipboard_behavior,
             clipboard_clear_delay=self.config.clipboard_clear_delay,
         )

@@ -68,7 +68,7 @@ class TextInjector:
         logger: logging.Logger,
         paste_mode: str,
         word_overrides: Dict[str, str],
-        whisper_prompt: str,
+        post_processing: str,
         clipboard_behavior: bool,
         clipboard_clear_delay: float,
     ) -> None:
@@ -77,7 +77,7 @@ class TextInjector:
         self._paste_mode = paste_mode
         self._word_overrides = {k.lower(): v for k, v in word_overrides.items()}
         self._override_pattern = self._build_override_pattern(self._word_overrides)
-        self._style = StyleGuide.from_prompt(whisper_prompt)
+        self._style = StyleGuide.from_prompt(post_processing)
         self._clipboard_behavior = clipboard_behavior
         self._clipboard_clear_delay = max(0.1, clipboard_clear_delay)
 

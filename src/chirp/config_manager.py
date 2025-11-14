@@ -23,7 +23,7 @@ class ChirpConfig:
     threads: Optional[int] = None
     language: Optional[str] = None
     word_overrides: Dict[str, str] = field(default_factory=dict)
-    whisper_prompt: str = ""
+    post_processing: str = ""
     paste_mode: str = "ctrl"
     clipboard_behavior: bool = True
     clipboard_clear_delay: float = 0.75
