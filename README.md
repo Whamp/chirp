@@ -1,6 +1,12 @@
 # Chirp
 
-Chirp is a Windows dictation app that runs fully locally using Parakeet speech-to-text models and is managed end-to-end with `uv`.
+Chirp is a Windows dictation app that runs fully locally using ParakeetV3 and is managed end-to-end with `uv`. Chirp does not require the ability to run executable files (like .exe) on Windows. It was designed so that if you're allowed to run Python on your machine, you can run Chirp. 
+
+## Why ParakeetV3? 
+
+ParakeetV3 has indistinguishable accuracy from Whisper-large-V3 (multilingual WER 4.91 vs 5.05) but is 17x faster and only requires a CPU while Whisper models of comparable accuracy require GPU's. 
+
+https://huggingface.co/spaces/hf-audio/open_asr_leaderboard
 
 ## Goals
 - Provide fast, reliable, local-first dictation on Windows.
@@ -23,9 +29,8 @@ Chirp is a Windows dictation app that runs fully locally using Parakeet speech-t
 1. Clone the repository and enter it:
    ```powershell
    git clone https://github.com/Whamp/chirp.git
-   # optionally using gh cli
-   # gh repo clone Whamp/chirp
    cd chirp
+   uv run python -m chirp.setup #one-time setup and model downloading
    ```
    
 ## Running
@@ -44,7 +49,9 @@ Chirp is a Windows dictation app that runs fully locally using Parakeet speech-t
 
 ## Removal
 - Delete the cloned `chirp` directory.
-- (Optional) remove Chirp user data from your Roaming profile:
-  ```powershell
-  Remove-Item -Recurse -Force "$Env:AppData\Chirp"
-  ```
+- That's it. 
+
+### Acknowledgments
+
+- NVIDA - https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
+- Ilya Stupakov - https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx
