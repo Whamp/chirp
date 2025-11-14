@@ -27,11 +27,7 @@ Chirp is a Windows dictation app that runs fully locally using Parakeet speech-t
    # gh repo clone Whamp/chirp
    cd chirp
    ```
-2. Run the one-time setup to fetch model files and initialize defaults:
-   ```powershell
-   uv run chirp-setup
-   ```
-
+   
 ## Running
 - Daily usage (preferred, works even on systems that block `.exe` launchers):
   ```powershell
