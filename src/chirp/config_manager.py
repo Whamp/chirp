@@ -12,7 +12,7 @@ from platformdirs import PlatformDirs
 
 @dataclass(kw_only=True, slots=True)
 class ChirpConfig:
-    primary_shortcut: str = "win+alt+d"
+    primary_shortcut: str = "ctrl+shift"
     stt_backend: str = "parakeet"
     parakeet_model: str = "nemo-parakeet-tdt-0.6b-v3"
     parakeet_quantization: Optional[str] = None
